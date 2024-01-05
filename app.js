@@ -204,7 +204,7 @@ app.use("/uploadd", (req,res)=>{
 
 
 //connect to backend
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8800;
 
 server.listen(port, '0.0.0.0', () => {
     connect()

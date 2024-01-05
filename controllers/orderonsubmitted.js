@@ -36,7 +36,7 @@ export const getOrder = async (req, res) => {
         // Find orders submitted by the specified user ID with status not equal to "waiting payment"
         const userOrders = await Ordersubmitted.find({
             userid: userId,
-            // status: { $nin: ['Waiting payment', 'waiting payment'] }, // Use $ne to exclude orders with "waiting payment" status
+            status: { $nin: ['Waiting payment', 'waiting payment'] }, // Use $ne to exclude orders with "waiting payment" status
         })
         .sort({ createdAt: 'desc' })
         .exec();
@@ -72,7 +72,7 @@ export const getSingleOrder = async (req, res) => {
         // Find the order with the specified order ID
         const order = await Ordersubmitted.findOne({
             _id: orderId,
-            // status: { $ne: 'waiting payment' }, // Exclude orders with "waiting payment" status
+            status: { $ne: 'waiting payment' }, // Exclude orders with "waiting payment" status
         }).exec();
         // console.log(order)
 
