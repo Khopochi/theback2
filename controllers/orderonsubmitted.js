@@ -1,5 +1,6 @@
 import Ordersubmitted from "../models/Ordersubmitted.js"
 import Product from "../models/Product.js"
+import Shipping from "../models/Shipping.js"
 import User from "../models/User.js"
 
 //ADD Ordersubmitted FUNCTION
@@ -35,7 +36,7 @@ export const getOrder = async (req, res) => {
         // Find orders submitted by the specified user ID with status not equal to "waiting payment"
         const userOrders = await Ordersubmitted.find({
             userid: userId,
-            status: { $nin: ['Waiting payment', 'waiting payment'] }, // Use $ne to exclude orders with "waiting payment" status
+            // status: { $nin: ['Waiting payment', 'waiting payment'] }, // Use $ne to exclude orders with "waiting payment" status
         })
         .sort({ createdAt: 'desc' })
         .exec();
@@ -71,8 +72,9 @@ export const getSingleOrder = async (req, res) => {
         // Find the order with the specified order ID
         const order = await Ordersubmitted.findOne({
             _id: orderId,
-            status: { $ne: 'waiting payment' }, // Exclude orders with "waiting payment" status
+            // status: { $ne: 'waiting payment' }, // Exclude orders with "waiting payment" status
         }).exec();
+        // console.log(order)
 
         if (!order) {
             return res.status(404).json({ message: 'Order not found or has "waiting payment" status' });
@@ -81,6 +83,19 @@ export const getSingleOrder = async (req, res) => {
         // Process the cart array to get details for each product
         const newCart = await Promise.all(order.cart.map(async (item) => {
             const productDetails = await Product.findById(item.productid).exec();
+            const { location, weight } = item;
+
+            // Find the location document based on the provided location name
+            const locationData = await Shipping.findOne({ location });
+    
+            let shippingcost = 0
+            if (locationData) {
+                  // Find the charge based on weight
+                  const charge = locationData.charge.find(
+                    (charge) => weight >= charge.minweight && weight <= charge.maxweight
+                  );
+                  shippingcost = charge.cost * item.quantity
+            }
 
             return {
                 id: iddd++,
@@ -89,7 +104,9 @@ export const getSingleOrder = async (req, res) => {
                 productPhoto: productDetails.photos[0],
                 price: productDetails.price,
                 quantity: item.quantity,
-                total: productDetails.price * item.quantity,
+                location: item.location,
+                shipping: shippingcost,
+                total: (productDetails.price * item.quantity) + shippingcost,
             };
         }));
 
@@ -123,7 +140,7 @@ export const getAllOrders = async (req, res) => {
     try {
       // Find orders with status not equal to "waiting payment"
       const userOrders = await Ordersubmitted.find({
-        status: { $ne: 'waiting payment' },
+        // status: { $nin: ['Waiting payment', 'waiting payment'] },
       })
         .sort({ createdAt: 'desc' })
         .exec();

@@ -121,6 +121,7 @@ export const getProductsByBarcode = async (req, res) => {
 // Update product based on ID
 export const updateProductById = async (req, res) => {
   const productId = req.params.id;
+  console.log(req.body)
   try {
       // Find the product by ID and update it with the request body
       const updatedProduct = await Product.findByIdAndUpdate(req.params.id, {$set: req.body}, {new:true});

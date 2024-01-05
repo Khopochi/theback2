@@ -62,6 +62,9 @@ const ProductScheme = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    vatcode: {
+        type: String,
+    },
     discount: {
         type: Number,
     },

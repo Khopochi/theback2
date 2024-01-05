@@ -11,7 +11,7 @@ const OrdersubmittedSchema = new mongoose.Schema({
             {
               productid: String,
               quantity: Number,
-              wight: Number,
+              weight: Number,
               location: String
             },
           ],

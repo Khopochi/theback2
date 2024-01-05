@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyAdmin } from "../utils/verifyToken.js";
-import { addDeepcategory, deleteDeepcategory, getAllCatDeep, getAllDeepCategories, getCategoriesByTerm, getSingleDeepcategorYPage, getSingleDeepcategory, updateDeepcategory } from "../controllers/deepcategoty.js";
+import { addDeepcategory, deleteDeepcategory, getAllCatDeep, getAllDeepCategories, getCategoriesByTerm, getCategoriesByTerm2, getSingleDeepcategorYPage, getSingleDeepcategory, updateDeepcategory } from "../controllers/deepcategoty.js";
 
 
 
@@ -14,6 +14,7 @@ router.get("/getSingleDeepcategory/:id",  getSingleDeepcategory)
 router.get("/", getAllDeepCategories)
 router.get("/home", getAllCatDeep)
 router.get("/search/:term", getCategoriesByTerm)
+router.get("/search2/:term", getCategoriesByTerm2)
 router.get("/page/:id", getSingleDeepcategorYPage)
 
 

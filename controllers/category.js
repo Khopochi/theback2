@@ -67,3 +67,20 @@ export const getAllCategories = async (req, res) => {
         res.status(500).json({ error: "Operation Failed", errorDetails: err });
     }
 };
+
+
+export const getCategoriesByTerm = async (req, res) => {
+    try {
+      const term = req.params.term;
+  
+      // Case-insensitive regular expression for matching the term in the name field
+      const regex = new RegExp(term, 'i');
+  
+      // Find categories that match the search term
+      const matchingCategories = await Category.find({ name: regex });
+      res.status(200).json(matchingCategories);
+    } catch (err) {
+      res.status(500).json({ error: "Operation Failed", errorDetails: err });
+    }
+  };
+  

@@ -41,7 +41,7 @@ export const login = async (req,res) => {
     try{
         const user = await Admin.findOne({username:req.body.username})
         if(!user){
-            res.status(200).json({ error: "No user" })
+           return res.status(200).json({ error: "No user" })
         }
         
         const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password)

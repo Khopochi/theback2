@@ -22,6 +22,9 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import fileUpload from 'express-fileupload';
 import fs from 'fs'
+import mysql from 'mysql2'
+import Product from './models/Product.js';
+import MySQLEvents from 'mysql-events';
 
 
 
@@ -198,8 +201,10 @@ app.use("/uploadd", (req,res)=>{
 })
 //upload image for product ends here
 
+
+
 //connect to backend
-const port = process.env.PORT || 8800;
+const port = process.env.PORT || 8080;
 
 server.listen(port, '0.0.0.0', () => {
     connect()

@@ -1,5 +1,6 @@
 import Category from "../models/Category.js"
 import Deepcategory from "../models/Deepcategory.js"
+import Product from "../models/Product.js"
 import Subcategory from "../models/Subcategory.js"
 
 
@@ -16,9 +17,19 @@ export const addDeepcategory = async (req,res) => {
 
 //UPDATE Deepcategory
 export const updateDeepcategory = async (req,res) => {
+    console.log(req.body)
     try{
         //savr Deepcategory in database
         const updateDeepcategory = await Deepcategory.findByIdAndUpdate(req.params.id, {$set: req.body}, {new:true})
+        const updatedProducts = await Product.updateMany(
+            { deepcategoryid: req.params.id }, // Find products with the old subcategory ID
+            { $set: { 
+                categoryid: req.body.categoryyid, // Set the category ID to the new category ID
+                subcategoryid: req.body.subcategoryid // Set the subcategory ID to the new subcategory ID
+            }}
+        );
+        
+
         res.status(200).json(updateDeepcategory)
     }catch(err){
         res.status(200).json({error: "Operation Failed", errorDetails: err})
@@ -100,6 +111,51 @@ export const getCategoriesByTerm = async (req, res) => {
     res.status(500).json({ error: "Operation Failed", errorDetails: err });
   }
 };
+
+
+
+
+export const getCategoriesByTerm2 = async (req, res) => {
+  try {
+    const term = req.params.term;
+
+    // Case-insensitive regular expression for matching the term in the name field
+    const regex = new RegExp(term, 'i');
+
+    // Find deep categories that match the search term
+    const matchingDeepCategories = await Deepcategory.find({ name: regex });
+
+    // Create an array to store the final result with category and subcategory names
+    const result = [];
+
+    // Loop through each matching deep category
+    for (const deepCategory of matchingDeepCategories) {
+      // Extract categoryId and subcategoryId from the deep category record
+      const { categoryyid, subcategoryid } = deepCategory;
+
+      // Fetch the category and subcategory names using the IDs
+      const category = await Category.findById(categoryyid);
+      const subcategory = await Subcategory.findById(subcategoryid);
+
+      // Build the final result object with all deep category attributes and added names
+      const finalResult = {
+        ...deepCategory.toObject(), // Include all deep category attributes
+        categoryName: category ? category.name : null,
+        subcategoryName: subcategory ? subcategory.name : null,
+      };
+
+      // Push the result object to the array
+      result.push(finalResult);
+    }
+
+    // Send the final result as JSON response
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Operation Failed", errorDetails: err });
+  }
+};
+
+
 
 //SIMPLIFIES GET
 //GET ALL CATEGORIES

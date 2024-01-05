@@ -11,8 +11,8 @@ mongoose.connect("mongodb+srv://zola4017:C6wdMuHRQBbpilSm@agriconnect.09iitjf.mo
 
 // Update existing documents in the "products" collection
 Product.updateMany(
-  { disc: { $exists: false }, vat: { $exists: false } }, // Match documents that don't have the new fields
-  { $set: { disc: true, vat: true } },
+  { vatcode: { $exists: false }}, // Match documents that don't have the new fields
+  { $set: { vatcode: "A"} },
   { maxTimeMS: 30000 } // Set the default values for the new fields
 )
   .then(result => {

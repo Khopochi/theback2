@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verifyAdmin } from "../utils/verifyToken.js";
-import { addCategory, deleteCategory, getAllCategories, getSingleCategory, updateCategory } from "../controllers/category.js";
+import { addCategory, deleteCategory, getAllCategories, getCategoriesByTerm, getSingleCategory, updateCategory } from "../controllers/category.js";
 
 
 //route requests
@@ -10,6 +10,7 @@ router.post("/addCategory", addCategory)
 router.put("/updateCategory/:id",  updateCategory)
 router.delete("/deleteCategory/:id",  deleteCategory)
 router.get("/getSingleCategory/:id",  getSingleCategory)
+router.get("/search/:term", getCategoriesByTerm)
 router.get("/", getAllCategories)
 
 
