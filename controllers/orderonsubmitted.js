@@ -140,7 +140,7 @@ export const getAllOrders = async (req, res) => {
     try {
       // Find orders with status not equal to "waiting payment"
       const userOrders = await Ordersubmitted.find({
-        // status: { $nin: ['Waiting payment', 'waiting payment'] },
+        status: { $nin: ['Waiting payment', 'waiting payment'] },
       })
         .sort({ createdAt: 'desc' })
         .exec();
