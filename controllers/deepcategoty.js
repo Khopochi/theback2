@@ -39,12 +39,28 @@ export const updateDeepcategory = async (req,res) => {
 
 //DELETE Deepcategory
 export const deleteDeepcategory = async (req,res) => {
-    try{
-        //delete database
-        await Deepcategory.findByIdAndDelete(req.params.id)
-        res.status(200).json({success : "Deepcategory has been deleted"})
-    }catch(err){
-        res.status(200).json({error: "Operation Failed", errorDetails: err})
+    try {
+        // Check if deep categories exist for the given subcategory id
+        const deepCategoriesExist = await Product.exists({ deepcategoryid: req.params.id });
+
+        if (deepCategoriesExist) {
+            // Deep categories exist, retrieve and return their details
+            const deepCategories = await Product.find({ deepcategoryid: req.params.id });
+
+            res.status(200).json({
+                message: "Deep categories exist under this subcategory",
+                deepCategories: deepCategories.map(deepCategory => ({
+                    barcode: deepCategory.barcode,
+                    name: deepCategory.name
+                }))
+            });
+        } else {
+            // No deep categories exist, delete the subcategory
+            await Subcategory.findByIdAndDelete(req.params.id);
+            res.status(200).json({ success: "Subcategory has been deleted" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: "Operation Failed", errorDetails: err });
     }
 }
 

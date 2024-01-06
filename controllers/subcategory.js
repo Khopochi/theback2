@@ -1,4 +1,5 @@
 import Category from "../models/Category.js"
+import Deepcategory from "../models/Deepcategory.js"
 import Product from "../models/Product.js"
 import Subcategory from "../models/Subcategory.js"
 
@@ -34,15 +35,35 @@ export const updateSubcategory = async (req, res) => {
 
 
 //DELETE Subcategory
-export const deleteSubcategory = async (req,res) => {
-    try{
-        //delete database
-        await Subcategory.findByIdAndDelete(req.params.id)
-        res.status(200).json({success : "Subcategory has been deleted"})
-    }catch(err){
-        res.status(200).json({error: "Operation Failed", errorDetails: err})
+export const deleteSubcategory = async (req, res) => {
+    try {
+        // Check if deep categories exist for the given subcategory id
+        const deepCategoriesExist = await Deepcategory.exists({ subcategoryid: req.params.id });
+
+        if (deepCategoriesExist) {
+            // Deep categories exist, retrieve and return their details
+            const deepCategories = await Deepcategory.find({ subcategoryid: req.params.id });
+
+            res.status(200).json({
+                message: "Deep categories exist under this subcategory",
+                deepCategories: deepCategories.map(deepCategory => ({
+                    id: deepCategory._id,
+                    name: deepCategory.name
+                }))
+            });
+        } else {
+            // No deep categories exist, delete the subcategory
+            await Subcategory.findByIdAndDelete(req.params.id);
+            res.status(200).json({ success: "Subcategory has been deleted" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: "Operation Failed", errorDetails: err });
     }
-}
+};
+
+
+
+
 
 //GET SINGLE Subcategory
 export const getSingleSubcategory = async (req,res) => {
