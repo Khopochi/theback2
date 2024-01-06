@@ -42,7 +42,7 @@ export const TransactionSTD = async (req,res) => {
   console.log(req.body.std)
     try{
         //posting payment
-        const response = await axios.post('https://https://api-gateway.standardbank.co.mw/identity/auth/access-token',{}, {headers})
+        const response = await axios.post('https://api-gateway.standardbank.co.mw/identity/auth/access-token',{}, {headers})
         const token = response.data.access_token
         //creating order
           const orderHeader = {
@@ -51,7 +51,7 @@ export const TransactionSTD = async (req,res) => {
             'accept': 'application/vnd.ni-payment.v2+json'
           };
 
-          const orderResponse = await axios.post('https://https://api-gateway.standardbank.co.mw/transactions/outlets/'+process.env.STDOUTLET+'/orders', req.body.std,{ headers: orderHeader })
+          const orderResponse = await axios.post('https://api-gateway.standardbank.co.mw/transactions/outlets/'+process.env.STDOUTLET+'/orders', req.body.std,{ headers: orderHeader })
           const newOrder = new Ordersubmitted({
             userid: req.body.userid,
             cart: req.body.cart,
