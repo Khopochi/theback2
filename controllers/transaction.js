@@ -2,6 +2,8 @@ import axios from "axios";
 import crypto from 'crypto'
 import Orderid from "../models/Orderid.js";
 import Ordersubmitted from "../models/Ordersubmitted.js"
+import dotenv from 'dotenv'
+
 
 
 
@@ -26,7 +28,9 @@ import Ordersubmitted from "../models/Ordersubmitted.js"
 // 'Authorization': 'Bearer  UCLcp1oeq44KPXr8X*******xCzki2w'
 // };
 
-const api_key = 'NTcyMzM1YTAtOGIzMC00YWVjLTlhYzktNjllMWYwMzc5NDMwOjRmNTNkZDc0LWI0MmItNGM2OC1hNjUwLTU0OWUyN2Y2MDA3YQ=='
+dotenv.config()
+
+const api_key = process.env.STDAPIKEY
 const headers = {
   'content-type':'application/vnd.ni-identity.v1+json',
   'authorization': 'Basic '+api_key
@@ -38,7 +42,7 @@ export const TransactionSTD = async (req,res) => {
   console.log(req.body.std)
     try{
         //posting payment
-        const response = await axios.post('https://api-gateway.sandbox.standardbank.co.mw/identity/auth/access-token',{}, {headers})
+        const response = await axios.post('https://https://api-gateway.standardbank.co.mw/identity/auth/access-token',{}, {headers})
         const token = response.data.access_token
         //creating order
           const orderHeader = {
@@ -47,7 +51,7 @@ export const TransactionSTD = async (req,res) => {
             'accept': 'application/vnd.ni-payment.v2+json'
           };
 
-          const orderResponse = await axios.post('https://api-gateway.sandbox.standardbank.co.mw/transactions/outlets/c8937989-a7b5-4676-a50e-a5a824e77c7d/orders', req.body.std,{ headers: orderHeader })
+          const orderResponse = await axios.post('https://https://api-gateway.standardbank.co.mw/transactions/outlets/'+process.env.STDOUTLET+'/orders', req.body.std,{ headers: orderHeader })
           const newOrder = new Ordersubmitted({
             userid: req.body.userid,
             cart: req.body.cart,
@@ -212,8 +216,8 @@ export const TransactionAIRTEL = async (req, res) => {
     };
 
     const inputBodyToken = {
-      "client_id": "c00ee051-fccc-4092-b48d-eb72ff46a561",
-      "client_secret": "8ea70e41-ebdb-48b8-9701-4a93394739e6",
+      "client_id": process.env.AIRTELID,
+      "client_secret": process.env.AIRTELSECRET,
       "grant_type": "client_credentials"
     };
 
@@ -261,8 +265,8 @@ export const checkBalanceAirtel = async (req,res) => {
     };
     //TOKEN BODY
     const inputBodyToken = {
-      "client_id": "c00ee051-fccc-4092-b48d-eb72ff46a561",
-      "client_secret": "8ea70e41-ebdb-48b8-9701-4a93394739e6",
+      "client_id": process.env.AIRTELID,
+      "client_secret": process.env.AIRTELSECRET,
       "grant_type": "client_credentials"
     };
   try{
