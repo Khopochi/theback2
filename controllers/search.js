@@ -116,14 +116,15 @@ export const getSearch = async (req, res) => {
       // Find products based on the search term and matching category, subcategory, and deep category IDs
       const matchedProducts = await Product.find({
         $or: [
-          { name: { $regex: searchTerm, $options: 'i' } }, // Case-insensitive search in name
-          { details: { $regex: searchTerm, $options: 'i' } }, // Case-insensitive search in details
-          { searchTem: { $in: [searchTerm] } }, // Match if searchTerm is in the searchTem array
-          { categoryid: { $in: categoryIdsS } }, // Match products with matching category IDs
-          { subcategoryid: { $in: subcategoryIdsS } }, // Match products with matching subcategory IDs
-          { deepcategoryid: { $in: deepCategoryIdsS } }, // Match products with matching deep category IDs
+          { name: { $regex: searchTerm, $options: 'i' }, photos: { $exists: true, $ne: [] } },
+          { details: { $regex: searchTerm, $options: 'i' }, photos: { $exists: true, $ne: [] } },
+          { searchTem: { $in: [searchTerm] }, photos: { $exists: true, $ne: [] } },
+          { categoryid: { $in: categoryIdsS }, photos: { $exists: true, $ne: [] } },
+          { subcategoryid: { $in: subcategoryIdsS }, photos: { $exists: true, $ne: [] } },
+          { deepcategoryid: { $in: deepCategoryIdsS }, photos: { $exists: true, $ne: [] } },
         ],
-      }).limit(12);
+      }).limit(16);
+      
 
       // Extract unique category and subcategory ids from matched products
       const categoryIds = [...new Set(matchedProducts.map((product) => product.categoryid))];
@@ -155,7 +156,8 @@ export const getSearchSub = async (req, res) => {
       // Search for products that match the given search term
       const matchedProducts = await Product.find({
         subcategoryid: req.params.id,
-      }).limit(12);
+        photos: { $exists: true, $ne: [] }
+      }).limit(16);
 
 
       // Extract unique category and subcategory ids from matched products
@@ -166,7 +168,7 @@ export const getSearchSub = async (req, res) => {
       // Fetch category and subcategory details based on ids
       const categories = await Category.find({ _id: { $in: categoryIds } });
       const subcategories = await Subcategory.find({ _id: { $in: subcategoryIds } });
-      const deepCategories = await Deepcategory.find({ _id: { $in: deepCategoryIds } });
+      const deepCategories = await Deepcategory.find({ subcategoryid: req.params.id  });
 
       // Prepare the response JSON body
       const responseBody = {
@@ -188,7 +190,8 @@ export const getSearchCat = async (req, res) => {
       // Search for products that match the given search term
       const matchedProducts = await Product.find({
         categoryid: req.params.id,
-      }).limit(12);
+        photos: { $elemMatch: { $exists: true, $ne: [] } }
+      }).limit(16);
 
       console.log(matchedProducts)
 
@@ -199,8 +202,8 @@ export const getSearchCat = async (req, res) => {
 
       // Fetch category and subcategory details based on ids
       const categories = await Category.find({ _id: { $in: categoryIds } });
-      const subcategories = await Subcategory.find({ _id: { $in: subcategoryIds } });
-      const deepCategories = await Deepcategory.find({ _id: { $in: deepCategoryIds } });
+      const subcategories = await Subcategory.find({ categoryyid: { $in: req.params.id } });
+      const deepCategories = await Deepcategory.find({ categoryyid: { $in: req.params.id } });
 
       // Prepare the response JSON body
       const responseBody = {

@@ -25,6 +25,8 @@ import fs from 'fs'
 import mysql from 'mysql2'
 import Product from './models/Product.js';
 import MySQLEvents from 'mysql-events';
+import { getAllProducts } from './api/api.js';
+import { countProducts } from './controllers/product.js';
 
 
 
@@ -126,15 +128,36 @@ app.use(cors(corsOptions));
 
 
 //connect to mongoose
+let isFetching = false;
 const connect =  async () => {
     try {
         await mongoose.connect(process.env.MONGO);
         console.log("connected to Mongo")
+      //   setInterval(() => {
+      //     runGetAllProducts();
+      // }, 4000);
+      countProducts()
       } catch (error) {
         console.log(error);
       }
 }
 //this ends here
+
+//function to mainntaine interval
+const runGetAllProducts = async () => {
+  if (!isFetching) {
+      try {
+          isFetching = true;
+          await getAllProducts();
+      } catch (error) {
+          console.error("Error fetching products:", error);
+      } finally {
+          isFetching = false;
+      }
+  } else {
+      console.log("Previous fetch still in progress, skipping this interval.");
+  }
+};
 
 
 //rauting requests
@@ -200,7 +223,7 @@ app.use("/uploadd", (req,res)=>{
     res.status(200).json("worked")
 })
 //upload image for product ends here
-
+/////////////////////////////////////
 
 
 //connect to backend

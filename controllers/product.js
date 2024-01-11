@@ -15,6 +15,24 @@ export const addProduct = async (req,res) => {
     }
 }
 
+// Assuming you have a Product model defined somewhere in your code
+
+// Import necessary modules and models
+
+
+// Add a new function to count products with photos
+export const countProducts = async (req, res) => {
+    try {
+        // Use the countDocuments method to count products with at least one photo
+        const productsWithPhotosCount = await Product.countDocuments({ 'photos': { $exists: true, $ne: [] } });
+
+        console.log(productsWithPhotosCount)
+    } catch (err) {
+        console.log(err)
+    }
+};
+
+
 //get all products
 export const getAllProducts = async (req, res) => {
     try {
@@ -89,16 +107,29 @@ export const getProductById = async (req, res) => {
 };
 
 //get all products for home page
-export const getProducts = async (req,res) => {
+
+
+export const getProducts = async (req, res) => {
   try {
-    // Fetch all products from the database
-    const products = await Product.find().limit(10);
+    // Sample 10 products with images from the database
+    const products = await Product.aggregate([
+      {
+        $match: {
+          photos: { $exists: true, $ne: [] } // Only select products with non-empty photos array
+        }
+      },
+      {
+        $sample: { size: 10 } // Sample 10 products (adjust the size as needed)
+      }
+    ]).exec();
+
     res.status(200).json(products);
-  }catch(err){
+  } catch (err) {
     // Handle errors and return an empty array
-    res.status(200).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
 
 
 //get prodyct by barcode
@@ -199,29 +230,51 @@ export const updateProductById = async (req, res) => {
 //   }
 // };
 
+
+
 export const getCategoriesWithProducts = async (req, res) => {
   try {
+    // Fetch all categories
     const categories = await Category.find();
 
-    const categoriesWithProducts = await Promise.all(
+    // Sort categories based on the number of products with images
+    const sortedCategories = await Promise.all(
       categories.map(async (category) => {
+        const count = await Product.countDocuments({
+          categoryid: category._id,
+          photos: { $elemMatch: { $exists: true, $ne: [] } }
+        });
+
+        return { category, count };
+      })
+    );
+
+    sortedCategories.sort((a, b) => b.count - a.count);
+
+    // Fetch details for each category
+    const categoriesWithProducts = await Promise.all(
+      sortedCategories.map(async ({ category }) => {
         const subcategories = await Subcategory
           .find({ categoryyid: category._id })
           .limit(10)
           .lean();
 
-          const totalProducts = await Product.countDocuments({ categoryid: category._id });
-          // Ensure we don't skip more products than available
-          const randomSkip = totalProducts > 6 ? Math.floor(Math.random() * (totalProducts - 6)) : 0;
+        const totalProducts = await Product.countDocuments({
+          categoryid: category._id,
+          photos: { $elemMatch: { $exists: true, $ne: [] } }
+        });
 
-          const products = await Product.find({ categoryid: category._id })
-            .skip(randomSkip)
-            .limit(6)
-            .lean();
+        const randomSkip = totalProducts > 6 ? Math.floor(Math.random() * (totalProducts - 6)) : 0;
 
-
-
-          // console.log(totalProducts)
+        // Fetch products with images in the photos array
+        const products = await Product.find({
+          categoryid: category._id,
+          photos: { $exists: true, $ne: [] }, // Only select products with non-empty photos array
+        })
+        .skip(randomSkip)
+        .limit(6)
+        .select('-__v') // Exclude the version key if it exists
+        .lean();
 
         // Fetch deep category ids
         const deepCategoryIds = products.map(product => product.deepcategoryid);
@@ -251,6 +304,8 @@ export const getCategoriesWithProducts = async (req, res) => {
 };
 
 
+
+
 //shaffled products
 // Assuming you have a Product model defined
 // const Product = require('../models/Product'); // Import your Product model
@@ -262,7 +317,7 @@ export const getProductsShuffle = async (req, res) => {
 
     // First attempt to get products between 10000 and 50000
     products = await Product.aggregate([
-      { $match: { price: { $gte: 5000, $lte: 10000 } } },
+      { $match: { price: { $gte: 5000, $lte: 10000 }, photos: { $exists: true, $ne: [] } } },
       { $sample: { size: 10 } },
     ]);
 
@@ -271,7 +326,7 @@ export const getProductsShuffle = async (req, res) => {
       const additionalProductsCount = 10 - products.length;
 
       const additionalProducts = await Product.aggregate([
-        { $match: { price: { $gte: 3000, $lte: 5000 } } },
+        { $match: { price: { $gte: 3000, $lte: 5000 }, photos: { $exists: true, $ne: [] } } },
         { $sample: { size: additionalProductsCount } },
       ]);
 
@@ -338,14 +393,13 @@ export const searchProducts = async (req, res) => {
     // Find products based on the search term and matching category, subcategory, and deep category IDs
     const products = await Product.find({
       $or: [
-        { name: { $regex: searchTerm, $options: 'i' } }, // Case-insensitive search in name
-        { details: { $regex: searchTerm, $options: 'i' } }, // Case-insensitive search in details
-        { categoryid: { $in: categoryIds } }, // Match products with matching category IDs
-        { subcategoryid: { $in: subcategoryIds } }, // Match products with matching subcategory IDs
-        { deepcategoryid: { $in: deepCategoryIds } }, // Match products with matching deep category IDs
-        { _id: { $nin: array } }, // Exclude products with specified IDs
+        { name: { $regex: searchTerm, $options: 'i' },photos: { $exists: true, $ne: [] },_id: { $nin: array }  }, // Case-insensitive search in name
+        { details: { $regex: searchTerm, $options: 'i' },photos: { $exists: true, $ne: [] },_id: { $nin: array }  }, // Case-insensitive search in details
+        { categoryid: { $in: categoryIds },photos: { $exists: true, $ne: [] },_id: { $nin: array }  }, // Match products with matching category IDs
+        { subcategoryid: { $in: subcategoryIds },photos: { $exists: true, $ne: [] },_id: { $nin: array }  }, // Match products with matching subcategory IDs
+        { deepcategoryid: { $in: deepCategoryIds },photos: { $exists: true, $ne: [] },_id: { $nin: array }  }, // Match products with matching deep category IDs
       ],
-    }).limit(12);
+    }).limit(16);
 
     res.status(200).json(products);
   } catch (err) {
@@ -364,7 +418,8 @@ export const searchProductsCategory = async (req, res) => {
     const products = await Product.find({
       categoryid: catid,
       _id: { $nin: array },
-    }).limit(12);
+      photos: { $elemMatch: { $exists: true, $ne: [] } }
+    }).limit(16);
 
     res.status(200).json(products);
   } catch (err) {
@@ -384,6 +439,7 @@ export const searchProductsSub = async (req, res) => {
     const products = await Product.find({
       subcategoryid: catid,
       _id: { $nin: array },
+      photos: { $exists: true, $ne: [] }
     }).limit(12);
 
     res.status(200).json(products);
