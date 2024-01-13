@@ -133,9 +133,9 @@ const connect =  async () => {
     try {
         await mongoose.connect(process.env.MONGO);
         console.log("connected to Mongo")
-      //   setInterval(() => {
-      //     runGetAllProducts();
-      // }, 4000);
+    //     setInterval(() => {
+    //       runGetAllProducts();
+    //   }, 4000);
       countProducts()
       } catch (error) {
         console.log(error);
@@ -223,7 +223,7 @@ app.use("/uploadd", (req,res)=>{
     res.status(200).json("worked")
 })
 //upload image for product ends here
-/////////////////////////////////////
+///////////////////////////////////
 
 
 //connect to backend

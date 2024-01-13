@@ -87,7 +87,7 @@ export const getProductsByDeepCategoryId = async (req, res) => {
 
   try {
     // Find products with the specified deepCategoryId
-    const products = await Product.find({ deepcategoryid });
+    const products = await Product.find({ deepcategoryid, photos: { $exists: true, $ne: [] } });
     res.status(200).json(products);
   } catch (err) {
     console.error(err);

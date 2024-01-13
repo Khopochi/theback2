@@ -3,6 +3,7 @@ import { addProduct, getAllProducts, getCategoriesWithProducts, getProductById, 
 import { verifyAdmin } from "../utils/verifyToken.js";
 import { getSearch, getSearchCat, getSearchItems, getSearchSub } from "../controllers/search.js";
 import { Refresh } from "../controllers/refresh.js";
+import { fetchCategoriesWithImages, getDeepCategories } from "../mobile/categories.js";
 
 //route requests
 const router = Router()
@@ -24,6 +25,8 @@ router.get("/getshuffle", getProductsShuffle)
 router.get("/searchproducts/:id/:searchterm", searchProducts)
 router.get("/searchproductscategory/:id/:catid", searchProductsCategory)
 router.get("/searchproductsub/:id/:catid", searchProductsSub)
+router.get("/mobilecategories", fetchCategoriesWithImages)
+router.get("/mobiledeepcategories", getDeepCategories)
 
 
 
