@@ -64,7 +64,7 @@ async function truncateProductsTable() {
 }
 
 async function insertIntoMySQL(products) {
-    const insertQuery = 'INSERT INTO products (mongodbid, code, description, price, category, qty, dis, type) VALUES ?';
+    const insertQuery = 'INSERT INTO sales_buffer (mongodbid, code, description, price, category, qty, dis, type) VALUES ?';
 
     const values = products.map(product => [
         product.mongodbid,

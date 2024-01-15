@@ -30,7 +30,7 @@ export const addProduct = async (req,res) => {
 }
 //add to mysql
 async function addProductToMySQL(product) {
-  const insertQuery = 'INSERT INTO products (mongodbid, code, description, price, category, qty, dis, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+  const insertQuery = 'INSERT INTO sales_buffer (mongodbid, code, description, price, category, qty, dis, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
 
   const categoryDetails = await Category.findById(product.categoryid).exec();
   const categoryName = categoryDetails ? categoryDetails.name : 'Unknown Category';
@@ -205,7 +205,7 @@ export const updateProductById = async (req, res) => {
 
 //update in mysql
 async function updateProductInMySQL(product) {
-  const updateQuery = 'UPDATE products SET code = ?, description = ?, price = ?, category = ?, qty = ?, dis = ?, type = ? WHERE mongodbid = ?';
+  const updateQuery = 'UPDATE sales_buffer SET code = ?, description = ?, price = ?, category = ?, qty = ?, dis = ?, type = ? WHERE mongodbid = ?';
 
   const categoryDetails = await Category.findById(product.categoryid).exec();
   const categoryName = categoryDetails ? categoryDetails.name : 'Unknown Category';
