@@ -5,9 +5,9 @@ import mysql from 'mysql2'
 // Create a connection pool
 // Create a connection pool
 const pool = mysql.createPool({
-    host: '192.168.1.172',  // Replace with your MySQL server IP
-    user: 'kondwani',           // Replace with your MySQL username
-    password: 'kho_2000-Paul@zola', // Replace with your MySQL password
+    host: 'localhost',  // Replace with your MySQL server IP
+    user: 'root',           // Replace with your MySQL username
+    password: '', // Replace with your MySQL password
     database: 'jiabaili',    // Replace with your MySQL database name
     waitForConnections: true,
     connectionLimit: 10,
@@ -30,7 +30,7 @@ const pool = mysql.createPool({
     CREATE TABLE IF NOT EXISTS products (
       id INT PRIMARY KEY AUTO_INCREMENT,
       item_number INT,
-      code VARCHAR(255),
+      code VARCHAR(1000),
       mongodbid VARCHAR(255),
       description VARCHAR(255),
       type VARCHAR(255),

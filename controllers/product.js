@@ -2,6 +2,19 @@ import Category from "../models/Category.js"
 import Deepcategory from "../models/Deepcategory.js"
 import Product from "../models/Product.js"
 import Subcategory from "../models/Subcategory.js"
+import mysql from 'mysql2';
+
+
+//user
+const pool = mysql.createPool({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'jiabaili',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
 
 //ADD PRODUCT FUNCTION
@@ -9,11 +22,30 @@ export const addProduct = async (req,res) => {
     const newProduct = Product(req.body)
     try{
         const savedProduct = await newProduct.save()
+        await addProductToMySQL(savedProduct);
         res.status(200).json(savedProduct)
     }catch(err){
         res.status(200).json({err})   
     }
 }
+//add to mysql
+async function addProductToMySQL(product) {
+  const insertQuery = 'INSERT INTO products (mongodbid, code, description, price, category, qty, dis, type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+
+  const categoryDetails = await Category.findById(product.categoryid).exec();
+  const categoryName = categoryDetails ? categoryDetails.name : 'Unknown Category';
+
+  return new Promise((resolve, reject) => {
+      pool.query(insertQuery, [product._id.toString(), product.barcode, product.name, product.price, categoryName, product.quantity, product.disc ? 'YES' : 'NO', product.vatcode], (error, results) => {
+          if (error) {
+              reject(error);
+          } else {
+              resolve(results);
+          }
+      });
+  });
+}
+
 
 // Assuming you have a Product model defined somewhere in your code
 
@@ -31,6 +63,7 @@ export const countProducts = async (req, res) => {
         console.log(err)
     }
 };
+
 
 
 //get all products
@@ -159,6 +192,7 @@ export const updateProductById = async (req, res) => {
 
       // Check if a product with the specified ID was found and updated
       if (updatedProduct) {
+          await updateProductInMySQL(updatedProduct);
           res.status(200).json(updatedProduct);
       } else {
           res.status(404).json({ message: 'Product not found' });
@@ -168,6 +202,25 @@ export const updateProductById = async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+//update in mysql
+async function updateProductInMySQL(product) {
+  const updateQuery = 'UPDATE products SET code = ?, description = ?, price = ?, category = ?, qty = ?, dis = ?, type = ? WHERE mongodbid = ?';
+
+  const categoryDetails = await Category.findById(product.categoryid).exec();
+  const categoryName = categoryDetails ? categoryDetails.name : 'Unknown Category';
+
+  return new Promise((resolve, reject) => {
+      pool.query(updateQuery, [product.barcode, product.name, product.price, categoryName, product.quantity, product.disc ? 'YES' : 'NO', product.vatcode, product._id.toString()], (error, results) => {
+          if (error) {
+              reject(error);
+          } else {
+              resolve(results);
+          }
+      });
+  });
+}
+
 
 
 //get mastrcalss dope thing

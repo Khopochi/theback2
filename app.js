@@ -27,6 +27,7 @@ import Product from './models/Product.js';
 import MySQLEvents from 'mysql-events';
 import { getAllProducts } from './api/api.js';
 import { countProducts } from './controllers/product.js';
+import { updatepos } from './api/updatepos.js';
 
 
 
@@ -135,7 +136,7 @@ const connect =  async () => {
         console.log("connected to Mongo")
     //     setInterval(() => {
     //       runGetAllProducts();
-    //   }, 4000);
+    //    }, 4000);
       countProducts()
       } catch (error) {
         console.log(error);
@@ -148,7 +149,8 @@ const runGetAllProducts = async () => {
   if (!isFetching) {
       try {
           isFetching = true;
-          await getAllProducts();
+        //   await getAllProducts();
+        await updatepos()
       } catch (error) {
           console.error("Error fetching products:", error);
       } finally {
